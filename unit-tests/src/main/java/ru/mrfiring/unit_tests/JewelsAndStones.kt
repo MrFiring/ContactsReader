@@ -20,4 +20,44 @@ Constraints:
  */
 
 class JewelsAndStones {
+
+    fun numJewelsInStones(jewels: String, stones: String): Int {
+        validateJewels(jewels)
+        validateStones(stones)
+
+        var counter = 0
+
+        for (stone in stones) {
+            if (jewels.contains(stone)) {
+                counter++
+            }
+        }
+
+        return counter
+    }
+
+    private fun validateJewels(jewels: String) {
+        if (jewels.isBlank() || !jewels.hasLettersOnly()) {
+            throw IllegalArgumentException("Jewels string doesn't match the constraints.")
+        }
+
+        val checkedChars = mutableListOf<Char>()
+
+        //Check duplication of chars in jewel string.
+        //Add char to checkedChars only if there are no such char
+        for (c in jewels) {
+            if (checkedChars.contains(c)) {
+                throw IllegalArgumentException("Jewels string has a duplicate char: $c")
+            }
+            checkedChars.add(c)
+        }
+    }
+
+    private fun validateStones(stones: String) {
+        if (stones.isBlank() || !stones.hasLettersOnly()) {
+            throw IllegalArgumentException("Jewels string doesn't match the constraints.")
+        }
+    }
+
+
 }
