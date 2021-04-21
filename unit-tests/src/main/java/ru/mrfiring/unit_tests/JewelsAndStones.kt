@@ -55,7 +55,7 @@ class JewelsAndStones {
 
     private fun validateStones(stones: String) {
         if (stones.isBlank() || !stones.hasLettersOnly()) {
-            throw IllegalArgumentException("Jewels string doesn't match the constraints.")
+            throw IllegalArgumentException("Stones string doesn't match the constraints.")
         }
     }
 
