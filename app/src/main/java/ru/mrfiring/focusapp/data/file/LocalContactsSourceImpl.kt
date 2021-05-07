@@ -42,6 +42,18 @@ class LocalContactsSourceImpl(
         .firstOrError()
 
 
+    override fun updateContactWithId(contact: LocalContact): Completable = getContactsFromFile()
+        .flatMapObservable { Observable.fromIterable(it) }
+        .map {
+            if (it.id == contact.id) {
+                contact
+            } else {
+                it
+            }
+        }
+        .toList()
+        .flatMapCompletable { writeContactsToFile(it) }
+
     override fun deleteContactFromFileById(id: Int): Completable = getContactsFromFile()
         .flatMapObservable { Observable.fromIterable(it) }
         .filter { it.id != id }

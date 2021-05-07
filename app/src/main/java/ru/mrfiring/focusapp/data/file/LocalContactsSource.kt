@@ -11,6 +11,8 @@ interface LocalContactsSource {
 
     fun getContactFromFileById(id: Int): Single<LocalContact>
 
+    fun updateContactWithId(contact: LocalContact): Completable
+
     fun deleteContactFromFileById(id: Int): Completable
 
 }
