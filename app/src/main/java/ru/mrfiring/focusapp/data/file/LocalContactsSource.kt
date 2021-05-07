@@ -7,10 +7,10 @@ interface LocalContactsSource {
 
     fun getContactsFromFile(): Single<List<LocalContact>>
 
-    fun writeContactsToFile(): Completable
+    fun writeContactsToFile(list: List<LocalContact>): Completable
 
-    fun getContactFromFileById(): Single<LocalContact>
+    fun getContactFromFileById(id: Int): Single<LocalContact>
 
-    fun deleteContactFromFileById(): Completable
+    fun deleteContactFromFileById(id: Int): Completable
 
 }
