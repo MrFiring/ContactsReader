@@ -1,0 +1,18 @@
+package ru.mrfiring.focusapp.presentation
+
+import androidx.lifecycle.ViewModel
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+
+open class BaseViewModel : ViewModel() {
+    private val compositeDisposable = CompositeDisposable()
+
+    fun Disposable.untilDestroy() = compositeDisposable.add(this)
+
+    override fun onCleared() {
+        compositeDisposable.clear()
+        compositeDisposable.dispose()
+        super.onCleared()
+    }
+
+}

@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import dagger.android.support.DaggerFragment
 import ru.mrfiring.focusapp.databinding.FragmentHomeBinding
+import ru.mrfiring.focusapp.di.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
-class HomeFragment : Fragment() {
+class HomeFragment : DaggerFragment() {
 
     companion object {
         fun newInstance() = HomeFragment()
@@ -16,7 +19,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
 
-    private val viewModel: HomeViewModel by viewModels()
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,6 +28,11 @@ class HomeFragment : Fragment() {
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
+        val viewModel = ViewModelProvider(this, viewModelFactory)[HomeViewModel::class.java]
+
+        viewModel.contacts.observe(viewLifecycleOwner) {
+            Toast.makeText(context, "Received: $it", Toast.LENGTH_LONG).show()
+        }
 
         return binding.root
     }
