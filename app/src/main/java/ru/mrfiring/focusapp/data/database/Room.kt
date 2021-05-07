@@ -32,6 +32,6 @@ interface ContactsDao {
     entities = [DatabaseContact::class],
     version = 1
 )
-abstract class Room : RoomDatabase() {
+abstract class ContactsDatabase : RoomDatabase() {
     abstract val contactsDao: ContactsDao
 }
