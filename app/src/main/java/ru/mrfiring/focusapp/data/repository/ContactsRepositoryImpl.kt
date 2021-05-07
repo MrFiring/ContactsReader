@@ -3,6 +3,7 @@ package ru.mrfiring.focusapp.data.repository
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import ru.mrfiring.focusapp.data.database.ContactsDao
 import ru.mrfiring.focusapp.data.file.LocalContactsSource
 import ru.mrfiring.focusapp.data.mapper.*
@@ -28,7 +29,7 @@ class ContactsRepositoryImpl(
                     .map { it.asLocalContactsList() }
                     .flatMapCompletable { localContactsSource.writeContactsToFile(it) }
             }
-        }
+        }.observeOn(Schedulers.io())
 
     override fun getContactsFromStorage(useStorage: UseStorage): Flowable<List<DomainContact>> =
         when (useStorage) {
@@ -41,7 +42,7 @@ class ContactsRepositoryImpl(
                     .map { it.asDomainContactsList() }
                     .toFlowable()
             }
-        }
+        }.observeOn(Schedulers.io())
 
     override fun updateContact(contact: DomainContact, useStorage: UseStorage): Completable =
         when (useStorage) {
@@ -56,7 +57,7 @@ class ContactsRepositoryImpl(
                     contact.asLocalContact()
                 )
             }
-        }
+        }.observeOn(Schedulers.io())
 
     override fun getContactWithIdFromStorage(
         id: Int,
@@ -71,7 +72,7 @@ class ContactsRepositoryImpl(
             localContactsSource.getContactFromFileById(id)
                 .map { it.asDomainContact() }
         }
-    }
+    }.observeOn(Schedulers.io())
 
     override fun removeContact(contact: DomainContact, useStorage: UseStorage): Completable =
         when (useStorage) {
@@ -81,5 +82,5 @@ class ContactsRepositoryImpl(
             UseStorage.FILE -> {
                 localContactsSource.deleteContactFromFileById(contact.id)
             }
-        }
+        }.observeOn(Schedulers.io())
 }
