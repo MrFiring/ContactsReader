@@ -6,11 +6,12 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import okio.Okio
+import javax.inject.Inject
 
 private const val FILE_NAME = "contacts_storage.json"
 
-class LocalContactsSourceImpl(
-    private val moshi: Moshi,
+class LocalContactsSourceImpl @Inject constructor(
+    moshi: Moshi,
     private val context: Context
 ) : LocalContactsSource {
 

@@ -11,8 +11,9 @@ import ru.mrfiring.focusapp.data.provider.ContactsProvider
 import ru.mrfiring.focusapp.domain.UseStorage
 import ru.mrfiring.focusapp.domain.model.DomainContact
 import ru.mrfiring.focusapp.domain.repository.ContactsRepository
+import javax.inject.Inject
 
-class ContactsRepositoryImpl(
+class ContactsRepositoryImpl @Inject constructor(
     private val contactsDao: ContactsDao,
     private val localContactsSource: LocalContactsSource,
     private val contactsProvider: ContactsProvider

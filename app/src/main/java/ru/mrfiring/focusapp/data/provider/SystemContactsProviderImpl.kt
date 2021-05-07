@@ -5,8 +5,9 @@ import android.provider.ContactsContract
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import ru.mrfiring.focusapp.util.findColumnAndGetString
+import javax.inject.Inject
 
-class SystemContactsProviderImpl constructor(
+class SystemContactsProviderImpl @Inject constructor(
     private val context: Context
 ) : ContactsProvider {
 
