@@ -58,8 +58,9 @@ dependencies {
 
     //Dagger
     implementation "com.google.dagger:dagger:$version_dagger"
+    implementation "com.google.dagger:dagger-android-support:$version_dagger_android"
     kapt "com.google.dagger:dagger-compiler:$version_dagger"
-
+    kapt "com.google.dagger:dagger-android-processor:$version_dagger_android"
 
     //Fragment KTX
     implementation "androidx.fragment:fragment-ktx:$version_fragmentktx"
