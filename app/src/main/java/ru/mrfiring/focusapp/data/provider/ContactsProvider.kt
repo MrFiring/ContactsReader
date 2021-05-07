@@ -2,6 +2,6 @@ package ru.mrfiring.focusapp.data.provider
 
 import io.reactivex.Single
 
-interface SystemContactsProvider {
+interface ContactsProvider {
     fun getContactsFromPhonebook(): Single<List<ProviderContact>>
 }
