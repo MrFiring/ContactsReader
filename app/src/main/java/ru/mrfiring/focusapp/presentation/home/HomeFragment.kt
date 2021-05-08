@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
 import ru.mrfiring.focusapp.R
 import ru.mrfiring.focusapp.databinding.FragmentHomeBinding
@@ -14,6 +16,7 @@ import ru.mrfiring.focusapp.di.viewmodel.ViewModelFactory
 import ru.mrfiring.focusapp.domain.UseStorage
 import ru.mrfiring.focusapp.presentation.detail.DetailFragment
 import ru.mrfiring.focusapp.presentation.home.adapter.ContactsRecyclerViewAdapter
+import ru.mrfiring.focusapp.util.SwipeToDeleteCallback
 import javax.inject.Inject
 
 class HomeFragment : DaggerFragment() {
@@ -40,6 +43,7 @@ class HomeFragment : DaggerFragment() {
         viewModel.initialLoading()
 
         initAdapter()
+        initSwipeHelper()
 
         binding.homeToolbar.setOnMenuItemClickListener {
             respondToMenuItemClick(it)
@@ -73,6 +77,18 @@ class HomeFragment : DaggerFragment() {
         else -> false
     }
 
+    private fun initSwipeHelper() {
+        val swipeHelper = object : SwipeToDeleteCallback(requireContext()) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val contact = adapter.currentList[viewHolder.adapterPosition]
+                adapter.removeAt(viewHolder.adapterPosition)
+                viewModel.contactRemoved(contact)
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(swipeHelper)
+        itemTouchHelper.attachToRecyclerView(binding.homeContactsList)
+    }
 
     private fun initAdapter() {
         adapter = ContactsRecyclerViewAdapter {

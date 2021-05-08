@@ -18,6 +18,19 @@ class ContactsRecyclerViewAdapter(
         holder.bind(item, onClick)
     }
 
+    fun removeAt(index: Int) {
+        try {
+            currentList.removeAt(index)
+            notifyItemRemoved(index)
+        } catch (ex: UnsupportedOperationException) {
+            submitList(
+                currentList.filterIndexed { i, _ ->
+                    i != index
+                }
+            )
+        }
+    }
+
     private class ContactsDiffUtil : DiffUtil.ItemCallback<DomainContact>() {
         override fun areItemsTheSame(oldItem: DomainContact, newItem: DomainContact): Boolean {
             return oldItem.id == newItem.id
