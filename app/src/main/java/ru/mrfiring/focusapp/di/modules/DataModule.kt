@@ -1,20 +1,21 @@
 package ru.mrfiring.focusapp.di.modules
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
 private const val SHARED_PREFS_NAME = "ru.mrfiring.focusapp.SHARED_PREFS"
 
-@Module
-abstract class AndroidModule {
-
-    @Binds
-    abstract fun bindContext(application: Application): Context
+@Module(
+    includes = [
+        DatabaseModule::class,
+        ProviderModule::class,
+        LocalContactsSourceModule::class
+    ]
+)
+class DataModule {
 
     @Provides
     @Singleton

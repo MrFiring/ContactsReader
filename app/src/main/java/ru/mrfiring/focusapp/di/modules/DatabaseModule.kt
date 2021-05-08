@@ -8,7 +8,7 @@ import ru.mrfiring.focusapp.data.database.ContactsDao
 import ru.mrfiring.focusapp.data.database.ContactsDatabase
 import javax.inject.Singleton
 
-@Module(includes = [AndroidModule::class])
+@Module(includes = [ContextModule::class])
 class DatabaseModule {
 
     @Provides

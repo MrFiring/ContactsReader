@@ -7,16 +7,16 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import ru.mrfiring.focusapp.FocusApplication
-import ru.mrfiring.focusapp.di.modules.*
+import ru.mrfiring.focusapp.di.modules.AppActivityBindingModule
+import ru.mrfiring.focusapp.di.modules.DataModule
+import ru.mrfiring.focusapp.di.modules.RepositoryModule
 import ru.mrfiring.focusapp.di.viewmodel.ViewModelModule
 import javax.inject.Singleton
 
 @Singleton
 @Component(
     modules = [
-        DatabaseModule::class,
-        ProviderModule::class,
-        LocalContactsSourceModule::class,
+        DataModule::class,
         RepositoryModule::class,
         AndroidInjectionModule::class,
         AppActivityBindingModule::class,
