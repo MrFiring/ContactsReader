@@ -34,6 +34,8 @@ class HomeFragment : DaggerFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        requireActivity().requestPermissions(arrayOf(android.Manifest.permission.READ_CONTACTS), 1)
+
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         viewModel = ViewModelProvider(this, viewModelFactory)[HomeViewModel::class.java]
