@@ -3,4 +3,7 @@
     <string name="text_save">Save</string>
     <string name="hint_enter_name">Enter the name</string>
     <string name="hint_enter_phone">Enter the phone number</string>
+    <string name="text_menu_storage">Storage</string>
+    <string name="msg_selected_room">Selected Room storage</string>
+    <string name="msg_selected_file">Selected File storage</string>
 </resources>
