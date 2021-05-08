@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
                 contact = domainContact,
                 useStorage = if (it.isUseDBStorage) UseStorage.DATABASE else UseStorage.FILE
             )
-                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
         }
     }
@@ -83,19 +83,18 @@ class HomeViewModel @Inject constructor(
         _prefsState.value?.let { oldPrefs ->
             val newUseStorage = !oldPrefs.isUseDBStorage
 
-            _prefsState.postValue(
-                oldPrefs.copy(
-                    isUseDBStorage = newUseStorage
-                )
+            _prefsState.value = oldPrefs.copy(
+                isUseDBStorage = newUseStorage
             )
 
             _showStorageChangedToast.postValue(
                 if (newUseStorage) UseStorage.DATABASE else UseStorage.FILE
             )
+            savePrefs()
         }
     }
 
-    fun savePrefs() {
+    private fun savePrefs() {
         _prefsState.value?.let {
             Completable.mergeArray(
                 saveFirstLaunchPassedUseCase(it.isFirstLaunchPassed),
@@ -110,7 +109,7 @@ class HomeViewModel @Inject constructor(
     private fun fetchContacts(useDBStorage: Boolean) {
         val useStorage = if (useDBStorage) UseStorage.DATABASE else UseStorage.FILE
         fetchContactsFromProviderUseCase(useStorage)
-            .subscribeOn(AndroidSchedulers.mainThread())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
             .untilDestroy()
     }
@@ -118,7 +117,12 @@ class HomeViewModel @Inject constructor(
     private fun getContactsFromStorage(useDBStorage: Boolean) {
         val useStorage = if (useDBStorage) UseStorage.DATABASE else UseStorage.FILE
         getContactsFromStorageUseCase(useStorage)
-            .subscribeOn(AndroidSchedulers.mainThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                if (it.isEmpty()) {
+                    fetchContacts(useDBStorage)
+                }
+            }
             .subscribe {
                 _homeState.postValue(
                     HomeState.Success(it)
@@ -135,4 +139,9 @@ class HomeViewModel @Inject constructor(
         )
     }
 
+
+    override fun onCleared() {
+        savePrefs()
+        super.onCleared()
+    }
 }

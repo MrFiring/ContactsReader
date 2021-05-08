@@ -20,14 +20,16 @@ class LocalContactsSourceImpl @Inject constructor(
 
 
     override fun getContactsFromFile(): Single<List<LocalContact>> = Single.fromCallable {
+        var result = emptyList<LocalContact>()
 
         val inputStream = context.openFileInput(FILE_NAME)
         JsonReader.of(Okio.buffer(Okio.source(inputStream))).use {
             contactsAdapter.fromJson(it)?.let { contacts ->
-                return@fromCallable contacts
+                result = contacts
             }
         }
-    }
+        return@fromCallable result
+    }.onErrorReturn { emptyList() }
 
     override fun writeContactsToFile(list: List<LocalContact>): Completable =
         Completable.fromAction {

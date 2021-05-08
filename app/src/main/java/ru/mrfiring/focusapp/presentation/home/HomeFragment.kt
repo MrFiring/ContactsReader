@@ -64,11 +64,6 @@ class HomeFragment : DaggerFragment() {
         return binding.root
     }
 
-    override fun onStop() {
-        super.onStop()
-        viewModel.savePrefs()
-    }
-
     private fun respondToMenuItemClick(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
         R.id.homeMenuStorageSwitch -> {
             viewModel.storageTypeChanged()

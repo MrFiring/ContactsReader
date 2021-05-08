@@ -30,7 +30,7 @@ class ContactsRepositoryImpl @Inject constructor(
                     .map { it.asLocalContactsList() }
                     .flatMapCompletable { localContactsSource.writeContactsToFile(it) }
             }
-        }.observeOn(Schedulers.io())
+        }.subscribeOn(Schedulers.io())
 
     override fun getContactsFromStorage(useStorage: UseStorage): Flowable<List<DomainContact>> =
         when (useStorage) {
@@ -43,7 +43,7 @@ class ContactsRepositoryImpl @Inject constructor(
                     .map { it.asDomainContactsList() }
                     .toFlowable()
             }
-        }.observeOn(Schedulers.io())
+        }.subscribeOn(Schedulers.io())
 
     override fun updateContact(contact: DomainContact, useStorage: UseStorage): Completable =
         when (useStorage) {
@@ -58,7 +58,7 @@ class ContactsRepositoryImpl @Inject constructor(
                     contact.asLocalContact()
                 )
             }
-        }.observeOn(Schedulers.io())
+        }.subscribeOn(Schedulers.io())
 
     override fun getContactWithIdFromStorage(
         id: Int,
@@ -73,7 +73,7 @@ class ContactsRepositoryImpl @Inject constructor(
             localContactsSource.getContactFromFileById(id)
                 .map { it.asDomainContact() }
         }
-    }.observeOn(Schedulers.io())
+    }.subscribeOn(Schedulers.io())
 
     override fun removeContact(contact: DomainContact, useStorage: UseStorage): Completable =
         when (useStorage) {
@@ -83,5 +83,5 @@ class ContactsRepositoryImpl @Inject constructor(
             UseStorage.FILE -> {
                 localContactsSource.deleteContactFromFileById(contact.id)
             }
-        }.observeOn(Schedulers.io())
+        }.subscribeOn(Schedulers.io())
 }

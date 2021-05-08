@@ -43,5 +43,5 @@ class SystemContactsProviderImpl @Inject constructor(
         }
 
         return@fromCallable resultList.toList()
-    }.observeOn(Schedulers.io())
+    }.subscribeOn(Schedulers.io())
 }
