@@ -31,7 +31,7 @@ class HomeFragment : DaggerFragment() {
     lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: HomeViewModel
 
-    private lateinit var adapter: ContactsRecyclerViewAdapter
+    private var adapter: ContactsRecyclerViewAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,12 +57,12 @@ class HomeFragment : DaggerFragment() {
             viewModel.respondToPrefsState(newPrefs)
         }
 
-        viewModel.navigateToDetail.observe(viewLifecycleOwner) { contact ->
-            navigateToDetailFragment(contactId = contact.id)
+        viewModel.navigateToDetail.observe(viewLifecycleOwner) { id ->
+            navigateToDetailFragment(contactId = id)
         }
 
         viewModel.showStorageChangedToast.observe(viewLifecycleOwner) {
-            showStorageToast(it)
+            showStorageChangedMessage(it)
         }
 
         return binding.root
@@ -70,7 +70,7 @@ class HomeFragment : DaggerFragment() {
 
     private fun respondToMenuItemClick(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
         R.id.homeMenuStorageSwitch -> {
-            viewModel.storageTypeChanged()
+            viewModel.changeStorageType()
             true
         }
 
@@ -80,9 +80,11 @@ class HomeFragment : DaggerFragment() {
     private fun initSwipeHelper() {
         val swipeHelper = object : SwipeToDeleteCallback(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val contact = adapter.currentList[viewHolder.adapterPosition]
-                adapter.removeAt(viewHolder.adapterPosition)
-                viewModel.contactRemoved(contact)
+                adapter?.let {
+                    val contact = it.currentList[viewHolder.adapterPosition]
+                    adapter?.removeAt(viewHolder.adapterPosition)
+                    viewModel.removeContact(contact)
+                }
             }
         }
 
@@ -92,7 +94,7 @@ class HomeFragment : DaggerFragment() {
 
     private fun initAdapter() {
         adapter = ContactsRecyclerViewAdapter {
-            viewModel.onNavigateToDetail(it)
+            viewModel.onNavigateToDetail(it.id)
         }
         binding.homeContactsList.adapter = adapter
     }
@@ -111,11 +113,11 @@ class HomeFragment : DaggerFragment() {
                 homeContactsList.visibility = View.VISIBLE
                 homeProgressBar.visibility = View.GONE
             }
-            adapter.submitList(homeState.contacts)
+            adapter?.submitList(homeState.contacts)
         }
     }
 
-    private fun showStorageToast(useStorage: UseStorage) {
+    private fun showStorageChangedMessage(useStorage: UseStorage) {
         val message = when (useStorage) {
             UseStorage.DATABASE -> {
                 getString(R.string.msg_selected_room)
@@ -134,4 +136,9 @@ class HomeFragment : DaggerFragment() {
             .commit()
     }
 
+    override fun onDestroyView() {
+        adapter = null
+        binding.homeContactsList.adapter = null
+        super.onDestroyView()
+    }
 }
