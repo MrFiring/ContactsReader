@@ -30,8 +30,8 @@ class HomeViewModel @Inject constructor(
     val homeState: LiveData<HomeState>
         get() = _homeState
 
-    private val _navigateToDetail = SingleLiveEvent<DomainContact>()
-    val navigateToDetail: LiveData<DomainContact>
+    private val _navigateToDetail = SingleLiveEvent<Int>()
+    val navigateToDetail: LiveData<Int>
         get() = _navigateToDetail
 
     private val _showStorageChangedToast = SingleLiveEvent<UseStorage>()
@@ -64,11 +64,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onNavigateToDetail(domainContact: DomainContact) {
-        _navigateToDetail.postValue(domainContact)
+    fun onNavigateToDetail(contactId: Int) {
+        _navigateToDetail.postValue(contactId)
     }
 
-    fun contactRemoved(domainContact: DomainContact) {
+    fun removeContact(domainContact: DomainContact) {
         _prefsState.value?.let {
             removeContactUseCase(
                 contact = domainContact,
@@ -76,10 +76,11 @@ class HomeViewModel @Inject constructor(
             )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
+                .untilDestroy()
         }
     }
 
-    fun storageTypeChanged() {
+    fun changeStorageType() {
         _prefsState.value?.let { oldPrefs ->
             val newUseStorage = !oldPrefs.isUseDBStorage
 

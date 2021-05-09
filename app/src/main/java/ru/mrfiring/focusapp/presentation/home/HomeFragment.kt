@@ -57,12 +57,12 @@ class HomeFragment : DaggerFragment() {
             viewModel.respondToPrefsState(newPrefs)
         }
 
-        viewModel.navigateToDetail.observe(viewLifecycleOwner) { contact ->
-            navigateToDetailFragment(contactId = contact.id)
+        viewModel.navigateToDetail.observe(viewLifecycleOwner) { id ->
+            navigateToDetailFragment(contactId = id)
         }
 
         viewModel.showStorageChangedToast.observe(viewLifecycleOwner) {
-            showStorageToast(it)
+            showStorageChangedMessage(it)
         }
 
         return binding.root
@@ -70,7 +70,7 @@ class HomeFragment : DaggerFragment() {
 
     private fun respondToMenuItemClick(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
         R.id.homeMenuStorageSwitch -> {
-            viewModel.storageTypeChanged()
+            viewModel.changeStorageType()
             true
         }
 
@@ -82,7 +82,7 @@ class HomeFragment : DaggerFragment() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val contact = adapter.currentList[viewHolder.adapterPosition]
                 adapter.removeAt(viewHolder.adapterPosition)
-                viewModel.contactRemoved(contact)
+                viewModel.removeContact(contact)
             }
         }
 
@@ -92,7 +92,7 @@ class HomeFragment : DaggerFragment() {
 
     private fun initAdapter() {
         adapter = ContactsRecyclerViewAdapter {
-            viewModel.onNavigateToDetail(it)
+            viewModel.onNavigateToDetail(it.id)
         }
         binding.homeContactsList.adapter = adapter
     }
@@ -115,7 +115,7 @@ class HomeFragment : DaggerFragment() {
         }
     }
 
-    private fun showStorageToast(useStorage: UseStorage) {
+    private fun showStorageChangedMessage(useStorage: UseStorage) {
         val message = when (useStorage) {
             UseStorage.DATABASE -> {
                 getString(R.string.msg_selected_room)
@@ -134,4 +134,8 @@ class HomeFragment : DaggerFragment() {
             .commit()
     }
 
+    override fun onDestroyView() {
+        binding.homeContactsList.adapter = null
+        super.onDestroyView()
+    }
 }

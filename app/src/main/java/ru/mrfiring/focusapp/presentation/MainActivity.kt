@@ -28,14 +28,14 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     private fun checkPermissionsAndNavigate() {
-        if (checkReadContactsPermission()) {
+        if (isReadContactsPermissionGranted()) {
             navigateToHomeFragment()
         } else {
             askReadContactsPermission()
         }
     }
 
-    private fun checkReadContactsPermission(): Boolean =
+    private fun isReadContactsPermissionGranted(): Boolean =
         ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.READ_CONTACTS
