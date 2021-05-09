@@ -1,5 +1,6 @@
 package ru.mrfiring.focusapp.domain.usecase
 
+import io.reactivex.Completable
 import ru.mrfiring.focusapp.domain.UseStorage
 import ru.mrfiring.focusapp.domain.model.DomainContact
 import ru.mrfiring.focusapp.domain.repository.ContactsRepository
@@ -11,5 +12,5 @@ class UpdateContactUseCase @Inject constructor(
     operator fun invoke(
         contact: DomainContact,
         useStorage: UseStorage
-    ) = repository.updateContact(contact, useStorage)
+    ): Completable = repository.updateContact(contact, useStorage)
 }
