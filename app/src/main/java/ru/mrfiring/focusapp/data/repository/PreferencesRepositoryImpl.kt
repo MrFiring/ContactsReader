@@ -29,4 +29,19 @@ class PreferencesRepositoryImpl @Inject constructor(
             }
         }.subscribeOn(Schedulers.io())
     }
+
+    override fun getInt(preferencesKey: PreferencesKeys, defaultValue: Int): Single<Int> {
+        return Single.fromCallable {
+            preferences.getInt(preferencesKey.value, defaultValue)
+        }.subscribeOn(Schedulers.io())
+    }
+
+    override fun saveInt(preferencesKey: PreferencesKeys, value: Int): Completable {
+        return Completable.fromCallable {
+            preferences.edit {
+                putInt(preferencesKey.value, value)
+                    .apply()
+            }
+        }.subscribeOn(Schedulers.io())
+    }
 }
