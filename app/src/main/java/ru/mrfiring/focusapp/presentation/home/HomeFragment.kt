@@ -31,7 +31,7 @@ class HomeFragment : DaggerFragment() {
     lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: HomeViewModel
 
-    private lateinit var adapter: ContactsRecyclerViewAdapter
+    private var adapter: ContactsRecyclerViewAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,9 +80,11 @@ class HomeFragment : DaggerFragment() {
     private fun initSwipeHelper() {
         val swipeHelper = object : SwipeToDeleteCallback(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val contact = adapter.currentList[viewHolder.adapterPosition]
-                adapter.removeAt(viewHolder.adapterPosition)
-                viewModel.removeContact(contact)
+                adapter?.let {
+                    val contact = it.currentList[viewHolder.adapterPosition]
+                    adapter?.removeAt(viewHolder.adapterPosition)
+                    viewModel.removeContact(contact)
+                }
             }
         }
 
@@ -111,7 +113,7 @@ class HomeFragment : DaggerFragment() {
                 homeContactsList.visibility = View.VISIBLE
                 homeProgressBar.visibility = View.GONE
             }
-            adapter.submitList(homeState.contacts)
+            adapter?.submitList(homeState.contacts)
         }
     }
 
@@ -135,6 +137,7 @@ class HomeFragment : DaggerFragment() {
     }
 
     override fun onDestroyView() {
+        adapter = null
         binding.homeContactsList.adapter = null
         super.onDestroyView()
     }
