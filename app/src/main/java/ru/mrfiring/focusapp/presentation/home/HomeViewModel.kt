@@ -22,9 +22,7 @@ class HomeViewModel @Inject constructor(
     private val saveUseDBStorageByDefaultUseCase: SaveUseStorageUseCase
 ) : BaseViewModel() {
 
-    private val _prefsState = SingleLiveEvent<PrefsState>()
-    val prefState: LiveData<PrefsState>
-        get() = _prefsState
+    private var _prefsState: PrefsState? = null
 
     private val _homeState = MutableLiveData<HomeState>()
     val homeState: LiveData<HomeState>
@@ -34,9 +32,9 @@ class HomeViewModel @Inject constructor(
     val navigateToDetail: LiveData<Int>
         get() = _navigateToDetail
 
-    private val _showStorageChangedToast = SingleLiveEvent<UseStorage>()
+    private val _showStorageChanged = SingleLiveEvent<UseStorage>()
     val showStorageChangedToast: LiveData<UseStorage>
-        get() = _showStorageChangedToast
+        get() = _showStorageChanged
 
     fun initialLoading() {
         Single.zip(
@@ -46,22 +44,26 @@ class HomeViewModel @Inject constructor(
             PrefsState(isFirstRun, useStorage)
         }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { state -> _prefsState.postValue(state) }
+            .subscribe { state ->
+                _prefsState = state
+                respondToPrefsStateChange()
+            }
             .untilDestroy()
     }
 
-    fun respondToPrefsState(prefsState: PrefsState) {
-        _homeState.postValue(
-            HomeState.Loading
-        )
+    private fun respondToPrefsStateChange() {
+        _prefsState?.let { prefsState ->
+            with(prefsState) {
+                if (!isFirstLaunchPassed) {
+                    _homeState.postValue(HomeState.Loading)
 
-        with(prefsState) {
-            if (!isFirstLaunchPassed) {
-                fetchContacts(useStorage)
-                firstLaunchPassed(this)
+                    fetchContacts(useStorage)
+                    firstLaunchPassed(this)
+                }
+                getContactsFromStorage(useStorage)
             }
-            getContactsFromStorage(useStorage)
         }
+
     }
 
     fun onNavigateToDetail(contactId: Int) {
@@ -69,7 +71,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun removeContact(domainContact: DomainContact) {
-        _prefsState.value?.let {
+        _prefsState?.let {
             removeContactUseCase(
                 contact = domainContact,
                 useStorage = it.useStorage
@@ -81,20 +83,21 @@ class HomeViewModel @Inject constructor(
     }
 
     fun changeStorageType() {
-        _prefsState.value?.let { oldPrefs ->
+        _prefsState?.let { oldPrefs ->
             val newUseStorage = oldPrefs.useStorage.next()
 
-            _prefsState.value = oldPrefs.copy(
+            _prefsState = oldPrefs.copy(
                 useStorage = newUseStorage
             )
 
-            _showStorageChangedToast.postValue(newUseStorage)
+            _showStorageChanged.postValue(newUseStorage)
+            respondToPrefsStateChange()
             savePrefs()
         }
     }
 
     private fun savePrefs() {
-        _prefsState.value?.let {
+        _prefsState?.let {
             Completable.mergeArray(
                 saveFirstLaunchPassedUseCase(it.isFirstLaunchPassed),
                 saveUseDBStorageByDefaultUseCase(it.useStorage)
@@ -129,10 +132,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun firstLaunchPassed(prefsState: PrefsState) {
-        _prefsState.postValue(
-            prefsState.copy(
-                isFirstLaunchPassed = true
-            )
+        _prefsState = prefsState.copy(
+            isFirstLaunchPassed = true
         )
     }
 
