@@ -53,10 +53,6 @@ class HomeFragment : DaggerFragment() {
             renderState(newState)
         }
 
-        viewModel.prefState.observe(viewLifecycleOwner) { newPrefs ->
-            viewModel.respondToPrefsState(newPrefs)
-        }
-
         viewModel.navigateToDetail.observe(viewLifecycleOwner) { id ->
             navigateToDetailFragment(contactId = id)
         }
