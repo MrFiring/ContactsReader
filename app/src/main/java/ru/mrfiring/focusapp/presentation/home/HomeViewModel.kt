@@ -17,9 +17,9 @@ class HomeViewModel @Inject constructor(
     private val getContactsFromStorageUseCase: GetContactsFromStorageUseCase,
     private val removeContactUseCase: RemoveContactUseCase,
     private val getIsFirstLaunchPassedUseCase: GetIsFirstLaunchPassedUseCase,
-    private val getIsUseDBStorageByDefaultUseCase: GetIsUseDBStorageByDefaultUseCase,
+    private val getUseStorageUseCase: GetUseStorageUseCase,
     private val saveFirstLaunchPassedUseCase: SaveFirstLaunchPassedUseCase,
-    private val saveUseDBStorageByDefaultUseCase: SaveUseDBStorageByDefaultUseCase
+    private val saveUseDBStorageByDefaultUseCase: SaveUseStorageUseCase
 ) : BaseViewModel() {
 
     private val _prefsState = SingleLiveEvent<PrefsState>()
@@ -41,9 +41,9 @@ class HomeViewModel @Inject constructor(
     fun initialLoading() {
         Single.zip(
             getIsFirstLaunchPassedUseCase(),
-            getIsUseDBStorageByDefaultUseCase()
-        ) { isFirstRun, isUseDb ->
-            PrefsState(isFirstRun, isUseDb)
+            getUseStorageUseCase()
+        ) { isFirstRun, useStorage ->
+            PrefsState(isFirstRun, useStorage)
         }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { state -> _prefsState.postValue(state) }
@@ -56,11 +56,11 @@ class HomeViewModel @Inject constructor(
         )
 
         with(prefsState) {
-            if (!isFirstLaunchPassed && isUseDBStorage) {
-                fetchContacts(isUseDBStorage)
+            if (!isFirstLaunchPassed) {
+                fetchContacts(useStorage)
                 firstLaunchPassed(this)
             }
-            getContactsFromStorage(isUseDBStorage)
+            getContactsFromStorage(useStorage)
         }
     }
 
@@ -72,7 +72,7 @@ class HomeViewModel @Inject constructor(
         _prefsState.value?.let {
             removeContactUseCase(
                 contact = domainContact,
-                useStorage = if (it.isUseDBStorage) UseStorage.DATABASE else UseStorage.FILE
+                useStorage = it.useStorage
             )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
@@ -82,15 +82,13 @@ class HomeViewModel @Inject constructor(
 
     fun changeStorageType() {
         _prefsState.value?.let { oldPrefs ->
-            val newUseStorage = !oldPrefs.isUseDBStorage
+            val newUseStorage = oldPrefs.useStorage.next()
 
             _prefsState.value = oldPrefs.copy(
-                isUseDBStorage = newUseStorage
+                useStorage = newUseStorage
             )
 
-            _showStorageChangedToast.postValue(
-                if (newUseStorage) UseStorage.DATABASE else UseStorage.FILE
-            )
+            _showStorageChangedToast.postValue(newUseStorage)
             savePrefs()
         }
     }
@@ -99,7 +97,7 @@ class HomeViewModel @Inject constructor(
         _prefsState.value?.let {
             Completable.mergeArray(
                 saveFirstLaunchPassedUseCase(it.isFirstLaunchPassed),
-                saveUseDBStorageByDefaultUseCase(it.isUseDBStorage)
+                saveUseDBStorageByDefaultUseCase(it.useStorage)
             )
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe()
@@ -107,21 +105,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun fetchContacts(useDBStorage: Boolean) {
-        val useStorage = if (useDBStorage) UseStorage.DATABASE else UseStorage.FILE
+    private fun fetchContacts(useStorage: UseStorage) {
         fetchContactsFromProviderUseCase(useStorage)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
             .untilDestroy()
     }
 
-    private fun getContactsFromStorage(useDBStorage: Boolean) {
-        val useStorage = if (useDBStorage) UseStorage.DATABASE else UseStorage.FILE
+    private fun getContactsFromStorage(useStorage: UseStorage) {
         getContactsFromStorageUseCase(useStorage)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 if (it.isEmpty()) {
-                    fetchContacts(useDBStorage)
+                    fetchContacts(useStorage)
                 }
             }
             .subscribe {
